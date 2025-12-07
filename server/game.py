@@ -46,4 +46,7 @@ class Game:
             self.circle = not self.circle
             return True
         return False
+    
+    def reset_board(self):
+        self.board = ["" for _ in range(9)]
 

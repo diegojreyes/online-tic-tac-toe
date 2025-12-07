@@ -43,12 +43,23 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str):
                             "winner": game.check_winner(),
                             "ready": game.is_ready()
                         }))
-            else:
+            elif msg_type == "msg":
                 msg = payload.get("msg")
                 await manager.broadcast(room_id, json.dumps({
                     "type": "msg",
-                    "msg": msg
+                    "msg": ": ".join(["O" if payload.get("player") == "O" else "X", msg])
                 }))
+            
+            else:
+                game.reset_board()
+                await manager.broadcast(room_id, json.dumps({
+                    "type": "update",
+                    "board": game.board,
+                    "circle": game.circle,
+                    "winner": game.check_winner(),
+                    "ready": game.is_ready()
+                }))
+                
                         
     except WebSocketDisconnect:
         manager.disconnect(websocket, room_id)

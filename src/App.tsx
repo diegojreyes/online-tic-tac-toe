@@ -28,8 +28,7 @@ function App() {
         setCircle(data.circle)
         setWinner(data.winner)
         setIsReady(data.ready)
-      }
-      else{
+      } else if (data.type === "msg"){
         console.log("message received")
         setMessages((prev) => [...prev, data.msg])
       }
@@ -117,7 +116,7 @@ function App() {
           {winner && (
           <div className='col-span-3 flex justify-center w-full'>          
             <button 
-            onClick={() => window.location.reload()}
+            onClick={() => ws.current?.send(JSON.stringify({type : "reset"}))}
             className="mt-4 bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 "
             >
             Play Again
@@ -126,30 +125,49 @@ function App() {
         )}
         </div>
       </div>
-      <div className='w-80 flex flex-col bg-white p-4 border-l border-gray-300'>
-        <h2 className="font-bold mb-2">Chat</h2>
-        {
-          messages.map((m) => {
-            return <p className='margin-2'>{m}</p>
-          })
+      
+      <div className='w-1/4 flex flex-col bg-gray-900 border-l border-gray-700 shadow-xl'>
+        
+        <div className="p-4 border-b border-gray-700 bg-gray-800 shadow-sm">
+          <h2 className="font-bold text-white text-lg tracking-wide flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+            Live Chat
+          </h2>
+        </div>
 
-        }
-        <div className='mt-auto flex gap-2 w-full flex-row'>
-          <input type="text" value={message} 
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder='skill issue'
-          className='border-2 border-gray-800 rounded-md flex-1 p-1'
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              if (!message.trim()) return               
-              ws.current?.send(JSON.stringify({
-                type: "msg",
-                msg: message 
-              }))
-              setMessage("")
-            }
-          }} 
+        <div className='flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar'>
+          {messages.length === 0 && (
+            <p className="text-gray-500 text-center text-sm mt-10 italic">No messages yet...</p>
+          )}
+          {
+            messages.map((m, i) => (
+              <div key={i} className='bg-gray-800 text-gray-200 p-3 rounded-lg text-sm shadow-sm border border-gray-700 break-words'>
+                {m}
+              </div>
+            ))
+          }
+        </div>
+
+        <div className='p-4 bg-gray-900 border-t border-gray-700'>
+          <input 
+            type="text" 
+            value={message} 
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder='Type a message...'
+            className='w-full bg-gray-800 text-white border border-gray-600 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-500 transition-all'
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                if (!message.trim()) return               
+                ws.current?.send(JSON.stringify({
+                  type: "msg",
+                  msg: message, 
+                  player: mySymbol 
+                }))
+                setMessage("")
+              }
+            }} 
            />
+           <p className="text-xs text-gray-500 mt-2 text-right">Press Enter to send</p>
         </div>
       </div>
         
