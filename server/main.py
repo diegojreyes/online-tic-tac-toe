@@ -1,8 +1,20 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from connection_manager import ConnectionManager
+from fastapi.middleware.cors import CORSMiddleware
 import json
+import os
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", 
+                   "http://127.0.0.1:5173",
+                   os.getenv("FRONTEND")
+                   ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 manager = ConnectionManager()
 
 @app.websocket("/ws/{room_id}")
